@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     BlockedFriend[] blockedFriendsArray;
 
     ListView friendList;
+
+    int friendsLength;
 
     private class ParseTask extends AsyncTask<Void, Void, String> {
         HttpURLConnection urlConnection = null;
@@ -108,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
         StringBuffer buffer = new StringBuffer();
 
         Boolean status = false;
-
-        int friendsLength;
 
         @Override
         protected void onPreExecute(){

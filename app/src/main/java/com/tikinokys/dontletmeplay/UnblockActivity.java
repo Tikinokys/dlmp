@@ -118,7 +118,7 @@ public class UnblockActivity extends AppCompatActivity {
                 txtTimeLeft.setText(String.valueOf(daysUb) + "д. " + String.valueOf(hoursUb) + "ч. " + String.valueOf(minsUb) + "м.");
 
             }else{
-                Toast toast = Toast.makeText(UnblockActivity.this,"Ошибка =(", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(UnblockActivity.this,"Не удалось получить информацию о пользователе, обновите страницу", Toast.LENGTH_LONG);
                 toast.show();
             }
         }
