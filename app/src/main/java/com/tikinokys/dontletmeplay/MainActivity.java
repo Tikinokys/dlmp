@@ -9,6 +9,10 @@ import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -162,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result){
             if(status){
                 initFillIn();
-            }else{
             }
         }
     }
@@ -216,6 +219,18 @@ public class MainActivity extends AppCompatActivity {
         }else{
             setTitle(sPref.getString("user_login", ""));
         }
+
+        friendList.setAdapter(friendListAdapter);
+
+        friendList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(MainActivity.this, UnblockActivity.class);
+                intent.putExtra("friendName", blockedFriendsArray[i].getLogin());
+                startActivity(intent);
+            }
+        });
+
         new ParseTask1().execute();
     }
 
@@ -228,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
-
         switch(id){
             case R.id.action_block:
                 Intent intent1 = new Intent (this, BlockActivity.class);
