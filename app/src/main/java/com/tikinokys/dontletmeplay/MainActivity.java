@@ -10,6 +10,7 @@ import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     FriendListAdapter friendListAdapter;
     BlockedFriend[] blockedFriendsArray;
 
+    ListView friendList;
+
     private class ParseTask extends AsyncTask<Void, Void, String> {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         Boolean status = false;
         String json_login;
         String json_email;
+
 
         @Override
         protected String doInBackground(Void... params) {
@@ -105,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute(){
+
         }
 
         @Override
@@ -171,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void initFillIn(){
         friendListAdapter = new FriendListAdapter(this, fillIn());
+        friendList.setAdapter(friendListAdapter);
     }
 
     private void toLoginActivity(){
@@ -203,13 +209,14 @@ public class MainActivity extends AppCompatActivity {
 
         sPref = getSharedPreferences("MyPref",MODE_PRIVATE);
         token = sPref.getString("user_token", "");
+        friendList = (ListView) findViewById(R.id.friendList);
 
         if(sPref.getString("user_login", "").equals("")){
             new ParseTask().execute();
-            new ParseTask1().execute();
         }else{
             setTitle(sPref.getString("user_login", ""));
         }
+        new ParseTask1().execute();
     }
 
     public boolean onCreateOptionsMenu (Menu menu){
