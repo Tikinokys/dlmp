@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                     if(friendsLength>0) {
                         for (int i = 0; i < friendsLength; i++) {
                             JSONObject currentFriendJSON = (JSONObject) arrayOfFriendsJSON.get(i);
-                            long a = currentFriendJSON.getInt("block_expires")*1000;
+                            long a = currentFriendJSON.getLong("block_expires")*1000;
                             Timestamp stamp = new Timestamp(a);
                             Date date = new Date(stamp.getTime());
                             String s = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date));

@@ -26,10 +26,15 @@
         <activity
             android:name=".RegActivity"
             android:label="@string/reg_caption"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".BlockActivity"
-            android:label="Блокировка"></activity>
+            android:label="Блокировка"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UnblockActivity"
+            android:label="Разблокировка"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
