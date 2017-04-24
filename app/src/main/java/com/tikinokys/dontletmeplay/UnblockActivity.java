@@ -8,6 +8,10 @@ import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,9 +25,21 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class UnblockActivity extends AppCompatActivity {
+    final String USER_TOKEN = "user_token";
 
     SharedPreferences sPref;
     String token = "";
+    String loginFriend;
+
+    TextView txtBeginBlock;
+    TextView txtEndBlock;
+    TextView txtTimeLeft;
+
+    String blockExp;
+    String blockStr;
+
+    long blockExpires;
+    long blockStarts;
 
     private class ParseTask extends AsyncTask<Void, Void, String> {
         HttpURLConnection urlConnection = null;
@@ -34,7 +50,8 @@ public class UnblockActivity extends AppCompatActivity {
 
         Boolean status = false;
 
-        int friendsLength;
+        long timeDim;
+
 
         @Override
         protected void onPreExecute(){
@@ -64,21 +81,22 @@ public class UnblockActivity extends AppCompatActivity {
 
                 dataJsonObj = new JSONObject(resultJson);
                 status = dataJsonObj.getBoolean("status");
+
                 if(status) {
                     JSONObject data = dataJsonObj.getJSONObject("data");
-                    friendsLength = data.getInt("friendsLength");
-                    JSONArray arrayOfFriendsJSON = data.getJSONArray("friends");
-                    blockedFriendsArray = new BlockedFriend[friendsLength];
-                    if(friendsLength>0) {
-                        for (int i = 0; i < friendsLength; i++) {
-                            JSONObject currentFriendJSON = (JSONObject) arrayOfFriendsJSON.get(i);
-                            long a = currentFriendJSON.getLong("block_expires")*1000;
-                            Timestamp stamp = new Timestamp(a);
-                            Date date = new Date(stamp.getTime());
-                            String s = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date));
-                            blockedFriendsArray[i] = new BlockedFriend(currentFriendJSON.getString("username"), s);
-                        }
-                    }
+
+                    timeDim = data.getLong("time_dim");
+                    blockExpires = data.getLong("block_expires")*1000;
+                    blockStarts = data.getLong("block_starts")*1000;
+
+                    Timestamp stamp1 = new Timestamp(blockExpires);
+                    Date date1 = new Date(stamp1.getTime());
+                    blockExp = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date1));
+
+                    Timestamp stamp2 = new Timestamp(blockStarts);
+                    Date date2 = new Date(stamp2.getTime());
+                    blockStr = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date2));
+
                 }
 
             } catch (Exception e) {
@@ -90,8 +108,18 @@ public class UnblockActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             if(status){
-                initFillIn();
+                txtBeginBlock.setText(blockStr);
+                txtEndBlock.setText(blockExp);
+
+                long minsUb = (timeDim/60)%60;
+                long hoursUb = (timeDim/3600)%24;
+                long daysUb = (timeDim/86400);
+
+                txtTimeLeft.setText(String.valueOf(daysUb) + "д. " + String.valueOf(hoursUb) + "ч. " + String.valueOf(minsUb) + "м.");
+
             }else{
+                Toast toast = Toast.makeText(UnblockActivity.this,"Ошибка =(", Toast.LENGTH_SHORT);
+                toast.show();
             }
         }
     }
@@ -108,7 +136,7 @@ public class UnblockActivity extends AppCompatActivity {
         int friendsLength;
 
         @Override
-        protected void onPreExecute(){
+        protected void onPreExecute() {
 
         }
 
@@ -116,7 +144,7 @@ public class UnblockActivity extends AppCompatActivity {
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;
             try {
-                URL url = new URL("https://dlmp.herokuapp.com/api/users/getBlockedFriends?token=" + token);
+                URL url = new URL("https://dlmp.herokuapp.com/api/users/unblock/" + loginFriend + "?token=" + token);
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -135,22 +163,7 @@ public class UnblockActivity extends AppCompatActivity {
 
                 dataJsonObj = new JSONObject(resultJson);
                 status = dataJsonObj.getBoolean("status");
-                if(status) {
-                    JSONObject data = dataJsonObj.getJSONObject("data");
-                    friendsLength = data.getInt("friendsLength");
-                    JSONArray arrayOfFriendsJSON = data.getJSONArray("friends");
-                    blockedFriendsArray = new BlockedFriend[friendsLength];
-                    if(friendsLength>0) {
-                        for (int i = 0; i < friendsLength; i++) {
-                            JSONObject currentFriendJSON = (JSONObject) arrayOfFriendsJSON.get(i);
-                            long a = currentFriendJSON.getLong("block_expires")*1000;
-                            Timestamp stamp = new Timestamp(a);
-                            Date date = new Date(stamp.getTime());
-                            String s = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date));
-                            blockedFriendsArray[i] = new BlockedFriend(currentFriendJSON.getString("username"), s);
-                        }
-                    }
-                }
+
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -159,12 +172,18 @@ public class UnblockActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String result){
-            if(status){
-                initFillIn();
-            }else{
+        protected void onPostExecute(String result) {
+            if (status) {
+                Toast toast = Toast.makeText(UnblockActivity.this, "Пользователь разблокирован", Toast.LENGTH_SHORT);
+                toast.show();
+                toMainActivity();
             }
         }
+    }
+
+    private void toMainActivity(){
+            Intent intent = new Intent (this, MainActivity.class);
+            startActivity(intent);
     }
 
     public boolean onCreateOptionsMenu (Menu menu){
@@ -183,5 +202,29 @@ public class UnblockActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_unblock);
+
+        sPref = getSharedPreferences("MyPref",MODE_PRIVATE);
+        token = sPref.getString(USER_TOKEN, "");
+
+        Bundle bundle = getIntent().getExtras();
+        loginFriend = bundle.getString("friendName");
+
+        TextView txtLogin = (TextView) findViewById(R.id.txtLogin);
+        txtLogin.setText(loginFriend);
+
+        txtBeginBlock = (TextView) findViewById(R.id.txtBeginBlock);
+        txtEndBlock = (TextView) findViewById(R.id.txtEndBlock);
+        txtTimeLeft = (TextView) findViewById(R.id.txtTimeLeft);
+
+        new ParseTask().execute();
+
+        Button btn = (Button) findViewById(R.id.btnUnblock);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new ParseTask1().execute();
+            }
+        });
+
     }
 }
