@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -19,14 +21,16 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     SharedPreferences sPref;
     String token = "";
 
-    FriendListAdapter<BlockedFriend> adapter = new FriendListAdapter<BlockedFriend>();
-    BlockedFriend[] arrayOfFriends;
-
+    FriendListAdapter friendListAdapter;
+    BlockedFriend[] blockedFriendsArray;
 
     private class ParseTask extends AsyncTask<Void, Void, String> {
         HttpURLConnection urlConnection = null;
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         String json_login;
         String json_email;
 
+        @Override
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;
             try {
@@ -73,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
             return resultJson;
         }
 
+        @Override
         protected void onPostExecute(String result){
             if(status){
                 SharedPreferences.Editor ed = sPref.edit();
@@ -97,6 +103,11 @@ public class MainActivity extends AppCompatActivity {
 
         int friendsLength;
 
+        @Override
+        protected void onPreExecute(){
+        }
+
+        @Override
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;
             try {
@@ -122,12 +133,17 @@ public class MainActivity extends AppCompatActivity {
                 if(status) {
                     JSONObject data = dataJsonObj.getJSONObject("data");
                     friendsLength = data.getInt("friendsLength");
-                    arrayOfFriends = new BlockedFriend[friendsLength];
                     JSONArray arrayOfFriendsJSON = data.getJSONArray("friends");
-
-                    for (int i=0;i<friendsLength;i++){
-                        JSONObject currentFriendJSON = (JSONObject) arrayOfFriendsJSON.get(i);
-                        arrayOfFriends[i] = new BlockedFriend(currentFriendJSON.getLong("block_expires"), currentFriendJSON.getLong("block_starts"), currentFriendJSON.getString("username"));
+                    blockedFriendsArray = new BlockedFriend[friendsLength];
+                    if(friendsLength>0) {
+                        for (int i = 0; i < friendsLength; i++) {
+                            JSONObject currentFriendJSON = (JSONObject) arrayOfFriendsJSON.get(i);
+                            long a = currentFriendJSON.getInt("block_expires")*1000;
+                            Timestamp stamp = new Timestamp(a);
+                            Date date = new Date(stamp.getTime());
+                            String s = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date));
+                            blockedFriendsArray[i] = new BlockedFriend(currentFriendJSON.getString("username"), s);
+                        }
                     }
                 }
 
@@ -137,16 +153,24 @@ public class MainActivity extends AppCompatActivity {
             return resultJson;
         }
 
+        @Override
         protected void onPostExecute(String result){
             if(status){
-
+                initFillIn();
             }else{
             }
         }
     }
 
-    private void fillIn(){
-        adapter = new FriendListAdapter<BlockedFriend>(this, BlockedFriend.class, R.layout.item, arrayOfFriends.length());
+    public ArrayList<BlockedFriend> fillIn(){
+        ArrayList<BlockedFriend> items = new ArrayList<BlockedFriend>();
+        for(int i =0; i<blockedFriendsArray.length;i++){
+            items.add(blockedFriendsArray[i]);
+        }
+        return items;
+    }
+    public void initFillIn(){
+        friendListAdapter = new FriendListAdapter(this, fillIn());
     }
 
     private void toLoginActivity(){
@@ -182,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(sPref.getString("user_login", "").equals("")){
             new ParseTask().execute();
+            new ParseTask1().execute();
         }else{
             setTitle(sPref.getString("user_login", ""));
         }

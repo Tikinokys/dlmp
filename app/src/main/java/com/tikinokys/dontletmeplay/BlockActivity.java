@@ -173,10 +173,10 @@ public class BlockActivity extends AppCompatActivity {
                     JSONObject data = dataJsonObj.getJSONObject("data");
                     if(data.getBoolean("blocked")){
                         isBlocked = true;
+                        daysToUnblocked = data.getInt("days");
+                        hoursToUnblocked = data.getInt("hours");
+                        minutesToUnblocked = data.getInt("minutes");
                     }
-                    daysToUnblocked = data.getInt("days");
-                    hoursToUnblocked = data.getInt("hours");
-                    minutesToUnblocked = data.getInt("minutes");
                 }
 
             } catch (Exception e) {

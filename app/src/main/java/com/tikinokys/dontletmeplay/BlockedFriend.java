@@ -6,12 +6,13 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class BlockedFriend {
-    long unBlockDate;
-    String login;
+    private String unBlockDate;
+    private String login;
 
-    BlockedFriend(String l, long ubd){
-        this.unBlockDate = ubd;
-        this.login = l;
+    public BlockedFriend(String login, String unBlockDate){
+        super();
+        this.unBlockDate = unBlockDate;
+        this.login = login;
     }
 
     public String getLogin() {
@@ -19,14 +20,10 @@ public class BlockedFriend {
     }
 
     public String getUnBlockDate(){
-        long a = unBlockDate*1000;
-        Timestamp stamp = new Timestamp(a);
-        Date date = new Date(stamp.getTime());
-        String s = String.valueOf(DateFormat.format("dd-MM-yyyy (HH:mm)", date));
-        return s;
+        return unBlockDate;
     }
 
-    public void setUnBlockDate(long unBlockDate) {
+    public void setUnBlockDate(String unBlockDate) {
         this.unBlockDate = unBlockDate;
     }
 

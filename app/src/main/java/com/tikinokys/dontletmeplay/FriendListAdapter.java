@@ -4,50 +4,43 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class FriendListAdapter extends BaseAdapter {
+public class FriendListAdapter extends ArrayAdapter<BlockedFriend> {
 
-    private Context context;
-    ArrayList<BlockedFriend> data = new ArrayList<BlockedFriend>();
+    private final Context context;
+    private final ArrayList<BlockedFriend> itemsArrayList;
 
-    public FriendListAdapter(Context context, ArrayList<BlockedFriend> arr){
-        if(arr!=null){
-            data = arr;
-        }
+    public FriendListAdapter(Context context, ArrayList<BlockedFriend> itemsArrayList) {
+
+        super(context, R.layout.item, itemsArrayList);
+
         this.context = context;
+        this.itemsArrayList = itemsArrayList;
     }
 
     @Override
-    public int getCount() {
-        return data.size();
-    }
+    public View getView(int position, View convertView, ViewGroup parent) {
 
-    @Override
-    public Object getItem(int position) {
-        return data.get(position);
-    }
+        // 1. Create inflater
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
+        // 2. Get rowView from inflater
+        View rowView = inflater.inflate(R.layout.item, parent, false);
 
-    @Override
-    public View getView(int i, View someView, ViewGroup arg2) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        if(someView==null){
-            someView = inflater.inflate(R.layout.item, arg2, false);
-        }
-        TextView login = (TextView) someView.findViewById(R.id.txtLoginFriend);
-        TextView unblockingDate = (TextView) someView.findViewById(R.id.txtDateUnblock);
+        // 3. Get the two text view from the rowView
+        TextView labelView = (TextView) rowView.findViewById(R.id.txtLoginFriend);
+        TextView valueView = (TextView) rowView.findViewById(R.id.txtDateUnblock);
 
-        login.setText(data.get(i).getLogin());
-        unblockingDate.setText(data.get(i).getUnBlockDate());
+        // 4. Set the text for textView
+        labelView.setText(itemsArrayList.get(position).getLogin());
+        valueView.setText(itemsArrayList.get(position).getUnBlockDate());
 
-        return someView;
+        // 5. retrn rowView
+        return rowView;
     }
 }
