@@ -21,18 +21,17 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegActivity extends AppCompatActivity {
     SharedPreferences sPref;
     String token = "";
 
-    final String USER_TOKEN = "user_token";
-
     EditText pass1;
     EditText pass2;
     EditText login1;
     EditText email1;
-
 
     private class ParseTask extends AsyncTask<Void, Void, String> {
         HttpURLConnection urlConnection = null;
@@ -40,7 +39,6 @@ public class RegActivity extends AppCompatActivity {
 
         Boolean status = false;
 
-        String logintext;
         String passwordtext;
         String passwordrepeattext;
         String emailtext;
@@ -48,6 +46,7 @@ public class RegActivity extends AppCompatActivity {
         String resultJson = "";
         String emailError = null;
         String loginError = null;
+        String logintext;
 
         @Override
         protected void onPreExecute(){
@@ -56,6 +55,7 @@ public class RegActivity extends AppCompatActivity {
             passwordrepeattext = String.valueOf(((EditText) findViewById(R.id.PasswordRepeatText)).getText());
             emailtext = String.valueOf(((EditText) findViewById(R.id.EmailText)).getText());
         }
+
         @Override
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;
@@ -84,7 +84,12 @@ public class RegActivity extends AppCompatActivity {
                         JSONObject data = dataJsonObj.getJSONObject("data");
                         json_token = data.getString("token");
                     }else{
-                        JSONArray loginErrorArray = dataJsonObj.getJSONObject("errors").getJSONArray("username");
+                        JSONArray loginErrorArray;
+                        try {
+                            loginErrorArray = dataJsonObj.getJSONObject("errors").getJSONArray("username");
+                        } catch (Exception e) {
+                            loginErrorArray = null;
+                        }
                         if(loginErrorArray!=null) loginError = loginErrorArray.getString(0);
                         JSONArray emailErrorArray = dataJsonObj.getJSONObject("errors").getJSONArray("email");
                         if(emailErrorArray!=null) emailError = emailErrorArray.getString(0);
@@ -95,6 +100,7 @@ public class RegActivity extends AppCompatActivity {
                 }
             return resultJson;
         }
+
         protected void onPostExecute(String result){
             SharedPreferences.Editor ed = sPref.edit();
 
@@ -114,6 +120,17 @@ public class RegActivity extends AppCompatActivity {
             toMainActivity();
         }
     }
+
+    private Boolean checkLogin(){
+        final String regex = "[a-zA-Z0-9]*";
+
+        if(!String.valueOf(login1.getText()).matches(regex)){
+            login1.setError("логин должен состоять из цифр или латинских символов");
+            return false;
+        }
+        return true;
+    }
+
     private void toMainActivity(){
         if(token.length()!=0) {
             Toast toast3 = Toast.makeText(RegActivity.this, "Учётная запись зарегистрирована", Toast.LENGTH_SHORT);
@@ -125,6 +142,7 @@ public class RegActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
+
     protected Boolean isNotEmpty(){
         if((((EditText) findViewById(R.id.LoginText)).getText()).length()!=0 && (((EditText) findViewById(R.id.PasswordText)).getText()).length()!=0 && (((EditText) findViewById(R.id.PasswordRepeatText)).getText()).length()!=0 && (((EditText) findViewById(R.id.EmailText)).getText()).length()!=0) {
             return true;
@@ -134,6 +152,7 @@ public class RegActivity extends AppCompatActivity {
             return false;
         }
     }
+
     public boolean onCreateOptionsMenu (Menu menu){
 
         getMenuInflater().inflate(R.menu.menu_reg, menu);
@@ -195,7 +214,7 @@ public class RegActivity extends AppCompatActivity {
                 pass2 = (EditText) findViewById(R.id.PasswordRepeatText);
                 login1 = (EditText) findViewById(R.id.LoginText);
                 email1 = (EditText) findViewById(R.id.EmailText);
-                if (isNotEmpty() && passwordMatch() && loginLength()&& passwordLength()){
+                if (isNotEmpty() && passwordMatch() && loginLength()&& passwordLength() && checkLogin()){
                     new ParseTask().execute();
                 }
             }

@@ -48,12 +48,12 @@ public class LoginActivity extends AppCompatActivity {
         String json_token;
         Boolean hasInternetConnection = true;
 
-
         @Override
         protected void onPreExecute(){
             logintxt = String.valueOf(((EditText) findViewById(R.id.LoginTxt)).getText());
             passwordtxt = String.valueOf(((EditText) findViewById(R.id.PasswordTxt)).getText());
         }
+
         @Override
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;

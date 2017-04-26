@@ -45,17 +45,13 @@ public class UnblockActivity extends AppCompatActivity {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String resultJson = "";
-
         StringBuffer buffer = new StringBuffer();
 
         Boolean status = false;
-
         long timeDim;
-
 
         @Override
         protected void onPreExecute(){
-
         }
 
         @Override

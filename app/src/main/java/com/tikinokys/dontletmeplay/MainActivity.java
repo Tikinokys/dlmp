@@ -37,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     FriendListAdapter friendListAdapter;
     BlockedFriend[] blockedFriendsArray;
-
     ListView friendList;
-
     int friendsLength;
 
     private class ParseTask extends AsyncTask<Void, Void, String> {
@@ -178,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return items;
     }
+
     public void initFillIn(){
         friendListAdapter = new FriendListAdapter(this, fillIn());
         friendList.setAdapter(friendListAdapter);

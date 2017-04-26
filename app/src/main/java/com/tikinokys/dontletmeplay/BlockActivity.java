@@ -53,6 +53,9 @@ public class BlockActivity extends AppCompatActivity {
     TextView txtTimeLeftLabel;
     TextView txtTimeLeft;
     TextView txtAttention;
+    TextView txtFriendName;
+    String friendName;
+    TextView txtLoginFr;
 
     SharedPreferences sPref;
     String token = "";
@@ -77,6 +80,7 @@ public class BlockActivity extends AppCompatActivity {
             friendName = (friendName.equals(""))?"ttt":friendName;
             unlockingdate = String.valueOf((long) date.getTime()/1000);
         }
+
         @Override
         protected String doInBackground(Void... params) {
             JSONObject dataJsonObj = null;
@@ -176,6 +180,7 @@ public class BlockActivity extends AppCompatActivity {
                         daysToUnblocked = data.getInt("days");
                         hoursToUnblocked = data.getInt("hours");
                         minutesToUnblocked = data.getInt("minutes");
+                        friendName = data.getString("friend");
                     }
                 }
 
@@ -185,10 +190,11 @@ public class BlockActivity extends AppCompatActivity {
             return resultJson;
         }
 
-
         protected void onPostExecute(String result){
             if(status && isBlocked){
                 accBlocked();
+                txtLoginFr.setText("Логин друга: ");
+                txtFriendName.setText(friendName);
             }else{
                 txtAttention.setText("Внимание! \nНажимая на эту кнопку вы блокируете все игровые приложения на вашем компьютере. Они будут разблокированы по истечении указанного срока. Человек, чей логин указан в поле \"Логин друга\" получит возможность досрочно отключить блокировку.");
             }
@@ -269,6 +275,8 @@ public class BlockActivity extends AppCompatActivity {
             }
         });
 
+        txtFriendName = (TextView) findViewById(R.id.txtFriendName);
+        txtLoginFr = (TextView) findViewById(R.id.txtLoginFr);
         btn = (Button) findViewById(R.id.BlockBtn);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,6 +290,9 @@ public class BlockActivity extends AppCompatActivity {
                         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
                         date = dateFormat.parse(datetime);
                         new BlockActivity.ParseTask().execute();
+
+                        txtLoginFr.setText("Логин друга: ");
+                        txtFriendName.setText(txtloginfriend.getText());
 
                     } catch (Exception e) {
                         e.printStackTrace();
